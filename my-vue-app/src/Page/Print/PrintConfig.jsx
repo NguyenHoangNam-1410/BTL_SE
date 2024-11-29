@@ -1,4 +1,4 @@
-import React from 'react';
+
 import NavigationBar from "../../component/NavigationBar";
 import { useLocation } from 'react-router-dom';
 import DocViewer, { DocViewerRenderers } from 'react-doc-viewer'; // Thêm thư viện này

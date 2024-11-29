@@ -1,5 +1,5 @@
 
-.navigation-bar{
+.admin-navigation-bar {
     display: flex;
     background-color: #0B9CB6;
     width: 100%;
@@ -8,11 +8,13 @@
     align-items: center;
     z-index: 10;
 }
-.navigation-menu{
+
+.admin-navigation-menu{
     display: flex;
     list-style-type: none;
 }
-.navigation-menu li{
+
+.admin-navigation-menu li{
     color: white;
     font-size: 1.5rem;
     height: 100px;
@@ -22,52 +24,43 @@
     align-items: center;
     justify-content: center;
 }
-.navigation-menu li:hover{
+
+.admin-navigation-menu li:hover{
     background-color: #00879f;
 }
-.navigation-logo{
+
+/* Logo */
+.admin-navigation-logo {
     width: 70px;
     height: 70px;
     margin-right: 30px
 }
-.navigation-bar span{
+
+.admin-navigation-bar span {
     font-size: 30px;
     font-weight: bold;
 }
-.navigation-bar .login {
+
+.admin-navigation-bar .admin-login{
     color: white;
     margin-right: 20px;
     text-decoration: underline;
     font-size: 25px;
 }
-.navigation-bar ul{
+
+.admin-navigation-bar ul{
     margin-right: auto;
     height: 100%;
 }
 
-.navigation-bar .BKSPSS{
+.admin-navigation-bar .admin-BKSPSS{
     color: white;
     text-decoration: none;
 }
-.user_icon {
-    display: flex;
-    text-align: center;
-    gap: 10px;
-    margin-right: 30px;
-    text-decoration: none;
-}
-
-.user_icon .user{
-    margin-top: 7px;
-}
-
-.user_icon .dropmenu{
-    margin-top: 10px;
-}
 
 
-
-.dropdown-menu {
+/* Dropdown menu */
+.admin-dropdown-menu {
     position: fixed;
     font-size: 25px;
     height: auto; 
@@ -79,21 +72,21 @@
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 100;
-  }
-  
-  .dropdown-menu ul {
+}
+
+.admin-dropdown-menu ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
-  }
-  
-  .dropdown-menu li {
+}
+
+.admin-dropdown-menu li {
     padding: 10px;
     
     color: black;
     cursor: pointer;
-  }
-  
-  .dropdown-menu li:hover {
-    background-color: #a9a9a9;
-  }
+}
+
+.admin-dropdown-menu li:hover {
+    background-color: #f0f0f0;
+}

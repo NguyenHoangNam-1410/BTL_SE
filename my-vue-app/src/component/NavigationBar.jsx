@@ -32,7 +32,7 @@ function NavigationBar() {
 
   return (
     <nav className="navigation-bar">
-      <img src={logo} alt="Logo" className="navigation-logo" />
+      <img src={logo} alt="Logo" className="navigation-logo" /> 
       <Link to="/">
         <span className="BKSPSS">BK SSPS</span>
       </Link>
@@ -52,7 +52,8 @@ function NavigationBar() {
         <div className="user-icon-container" onClick={toggleDropdown}>
           <span className="user_icon">
             <FaCircleUser size="40" />
-            User <RxDropdownMenu />
+            <div className="user">User</div> 
+            <div className="dropmenu"><RxDropdownMenu /></div>
           </span>
         </div>
       )}

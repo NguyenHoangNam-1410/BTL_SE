@@ -14,7 +14,9 @@ function ChooseRole(){
             <h1>Log in using your account on</h1>
             <div className="role">
                <Link to="/login/user" style={{ textDecoration: 'none', color: 'inherit' }}><span><FaUser size="50px"/>User</span></Link> 
-                <span><FaRegUser size="50px"/>Admin</span>
+               <Link to="/login/admin" style={{ textDecoration: 'none', color: 'inherit' }}>
+  <span><FaRegUser size="50px"/>Admin</span>
+</Link>
             </div>
         </div>
         </>
