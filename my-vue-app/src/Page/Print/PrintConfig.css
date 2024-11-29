@@ -1,0 +1,54 @@
+.print-config-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+  }
+  
+  .left-panel {
+    width: 40%;
+    padding-right: 20px;
+  }
+  
+  .right-panel {
+    width: 55%;
+    padding-left: 20px;
+  }
+  
+  .option {
+    margin-bottom: 15px;
+  }
+  
+  option {
+    padding: 5px;
+  }
+  
+  select {
+    width: 100%;
+    padding: 5px;
+  }
+  
+  h3 {
+    margin-bottom: 20px;
+  }
+  
+  .left-panel h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .right-panel h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .print-config-container {
+      flex-direction: column;
+    }
+  
+    .left-panel,
+    .right-panel {
+      width: 100%;
+    }
+  }
+  
