@@ -128,16 +128,17 @@ class PrinterController {
             } = req.body;
 
             const [buildingName, roomNumber] = building_room_name.split('-');
+           
             const newPrinter = await this.printerRepository.create({
-                printerName: printer_name,
-                brandName: brand_name,
+                printer_name,
+                brand_name,
                 model,
-                campusName: campus_name,
-                buildingName,
-                roomNumber,
+                campus_name,
+                building_name: buildingName,
+                room_number: roomNumber,
                 status: status.toLowerCase(),
-                createAt: new Date(),
-                updateAt : new Date()
+                update_at: new Date(),
+                create_at : new Date()
             });
 
             res.status(200).json({

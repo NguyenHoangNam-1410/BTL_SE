@@ -5,11 +5,16 @@ import PrintConfigRepository from "../repositories/PrintConfigRepository.js";
  */
 class PrintConfigController {
     constructor() {
+
         this.printConfigRepository = new PrintConfigRepository();
+
     }
 
-    async getDefaultConfig(req, res) {
+    getDefaultConfig = async (req, res) => {
         try {
+         
+            console.log(this.printConfigRepository)
+            console.log("Hello")
             const config = await this.printConfigRepository.getDefaultConfig();
             
             return res.status(200).json({

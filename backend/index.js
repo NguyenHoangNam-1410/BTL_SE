@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import printerRoutes from './routes/printer.routes.js'; 
-
+import printJobRoutes from './routes/printjob.routes.js'
+import semesterRoutes from './routes/semester.route.js';
 dotenv.config();
 
 const app = express();
@@ -13,6 +14,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use('/api', printerRoutes);
+
+app.use('/api', semesterRoutes);
+app.use('/api',printJobRoutes)
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
