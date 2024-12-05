@@ -1,5 +1,14 @@
 import FileRepository from "../repositories/FileRepository.js";
 
+const fs = require('fs');
+
+
+function getFileSizeInBytes(filePath) {
+    const stats = fs.statSync(filePath);
+    return stats.size;
+}
+
+
 /**
  * Controller handling File-related operations
  */
@@ -24,7 +33,7 @@ class FileController {
                     message: "No files found for this student"
                 });
             }
-
+            
             const formattedFiles = files.map(file => ({
                 fileId: file.fileId,
                 studentId: file.studentId,
@@ -32,56 +41,33 @@ class FileController {
                 filePath: file.filePath,
                 filename: file.filename,
                 status: file.status,
-                sizeInBytes: file.sizeInBytes,
-                uploadAt: file.uploadAt
+                sizeInBytes: getFileSizeInBytes(file_path),
+                uploadAt: new Date()
             }));
 
             res.status(200).json(formattedFiles);
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to fetch files: ${error.message}`
+                message: Failed to fetch files: ${error.message}
             });
         }
     };
-
-    getAllFiles = async (req, res) => {
-        try {
-            const files = await this.fileRepository.findAll();
-            console.log(files)
-            const formattedFiles = files.map(file => ({
-                fileId: file.fileId,
-                studentId: file.studentId,
-                amountPaid: file.amountPaid,
-                fileDate: file.fileDate,
-                paymentMethod: file.paymentMethod
-            }));
-            res.status(200).json(formattedFiles);
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: `Failed to fetch files: ${error.message}`
-            });
-        }
-    };
-
 
     /**
-   * Create file
+   * Upload file
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
-    createFile = async (req, res) => {
+    uploadFile = async (req, res) => {
         try {
             const {
-                file_id,
                 student_id,
                 file_type_id,
                 file_path,
-                filename,
-                status,
-                size_in_bytes
+                filename
             } = req.body;
+
 
             const newFile = await this.fileRepository.create({
                 fileId: file_id,
@@ -89,8 +75,8 @@ class FileController {
                 fileTypeId: file_type_id,
                 filePath: file_path,
                 filename: filename,
-                status: status.toLowerCase(),
-                sizeInBytes: size_in_bytes,
+                status: 'uploaded',
+                sizeInBytes: sizeInBytes,
                 upload_at: new Date()
             });
 
@@ -102,15 +88,21 @@ class FileController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to create file: ${error.message}`
+                message: Failed to create file: ${error.message}
             })
         }
     };
-    
-    deleteFileByID = async (req, res) => {
+
+
+    /**
+   * Delete file
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+    deleteFileByStudentId = async (req, res) => {
         try {
-            const fileId = parseInt(req.params.file_id);
-            const file = await this.fileRepository.delete(fileId);
+            const studentId = parseInt(req.params.student_id);
+            const file = await this.fileRepository.deleteByStudentId(studentId);
             if (!file) {
                 return res.status(404).json({
                     success: false,
@@ -120,8 +112,10 @@ class FileController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to fetch file: ${error.message}`
+                message: Failed to fetch file: ${error.message}
             })
         }
     };
 };
+
+export default new FileController();

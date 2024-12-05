@@ -2,8 +2,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import printerRoutes from './routes/printer.routes.js'; 
-import printJobRoutes from './routes/printjob.routes.js'
-import semesterRoutes from './routes/semester.route.js';
+
+import printJobRoutes from './routes/printjob.routes.js';
+import semesterRoutes from './routes/semesters.routes.js';
+import userRoutes from './routes/users.routes.js';
+import transactionRoutes from './routes/transactions.routes.js';
+import fileRoutes from './routes/files.routes.js';
 dotenv.config();
 
 const app = express();
@@ -14,6 +18,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use('/api', printerRoutes);
+
+app.use('/api', userRoutes);
+app.use('/api', transactionRoutes);
+app.use('/api', fileRoutes);
 
 app.use('/api', semesterRoutes);
 app.use('/api',printJobRoutes)
@@ -38,4 +46,6 @@ const startServer = async () => {
     }
 };
 
+
 startServer();
+

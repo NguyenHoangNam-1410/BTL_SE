@@ -8,7 +8,6 @@ class User{
       this.createAt  = createAt || new Date();
   }
 
-
   static create({userName, email, password, role}){
       return new User({
           userId: null,

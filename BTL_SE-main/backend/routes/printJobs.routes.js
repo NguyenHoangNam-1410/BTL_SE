@@ -1,11 +1,12 @@
 import express from 'express';
 import PrintJobController from '../controllers/PrintJobController.js';
 
-const router = express.Router();
 
-// Print job routes
-router.post('/print-jobs', PrintJobController.createPrintJob);
-router.get('/print-jobs/:student_id', PrintJobController.getPrintJobByID); 
-router.get('/print-jobs', PrintJobController.getAllPrintJobs); 
+const router1 = express.Router();
 
-export default router;
+
+router1.post('/print-jobs', PrintJobController.createPrintJob); // done
+router1.get('/print-jobs/:student_id', PrintJobController.getStudentPrintJobs); // done 
+router1.get('/print-jobs', PrintJobController.getAllPrintJobs); // done 
+router1.get('/print-jobs/:print_jobs_id/files', PrintJobController.getJobFiles);  // done 
+export default router1;

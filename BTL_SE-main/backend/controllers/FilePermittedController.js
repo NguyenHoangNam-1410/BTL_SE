@@ -8,6 +8,21 @@ class FilePermittedController {
         this.filePermittedRepository = new FilePermittedRepository();
     }
 
+
+    async getFileTypePerrmited(req, res) {
+        try {
+            const fileType = await this.filePermittedRepository.getFilePermitted();
+            
+            return res.status(200).json({
+                file_type_id: fileType.file_type_id,
+                mime_type: fileType.mime_type
+            });
+        } catch (error) {
+            console.error(`Error in getFileTypePermitted: ${error.message}`);
+            res.status(500).json({
+                success: false,
+                message: `Failed to fetch file type permitted: ${error.message}`
+
     async getDefaultConfig(req, res) {
         try {
             const config = await this.filePermittedRepository.getFilePermiited();
@@ -25,6 +40,7 @@ class FilePermittedController {
             res.status(500).json({
                 success: false,
                 message: `Failed to fetch default configuration: ${error.message}`
+
             });
         }
     }
