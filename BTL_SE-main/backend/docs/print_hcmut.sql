@@ -1,92 +1,258 @@
+-- Database setup
 DROP DATABASE IF EXISTS hcmutdb;
 CREATE DATABASE hcmutdb;
 USE hcmutdb;
 
+-- Semester page allocation table
+CREATE TABLE `SEMESTER_PAGE_ALLOCATION` (
+  `allocation_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `semester_name` VARCHAR(100),
+  `create_at` DATETIME,
+  `start_date` DATETIME,
+  `end_date` DATETIME,
+  `page_allocated` INT
+);
+
+-- User table
 CREATE TABLE `user` (
-  `user_id` int AUTO_INCREMENT PRIMARY KEY,
-  `user_name` varchar(255),
-  `email` varchar(255),
-  `password` varchar(255),
+  `user_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_name` VARCHAR(255),
+  `email` VARCHAR(255),
+  `password` VARCHAR(255),
   `role` ENUM('student', 'spso'),
-  `create_at` datetime
+  `create_at` DATETIME
 );
 
+-- Student table
 CREATE TABLE `student` (
-  `student_id` int PRIMARY KEY,
-  `user_id` int,
-  `default_page_allocation` int,
-  `page_balance` int,
-  FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `student_id` INT PRIMARY KEY,
+  `user_id` INT,
+  `allocation_id` INT,
+  `page_balance` INT,
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`allocation_id`) REFERENCES `SEMESTER_PAGE_ALLOCATION`(`allocation_id`)
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
 );
 
+-- Transaction table
 CREATE TABLE `transaction` (
-  `transaction_id` int PRIMARY KEY,
-  `student_id` int,
-  `amount_paid` decimal(10,2),
-  `transaction_date` datetime,
-  `payment_method` varchar(255),
-  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `transaction_id` INT PRIMARY KEY,
+  `student_id` INT,
+  `amount_paid` DECIMAL(10,2),
+  `transaction_date` DATETIME,
+  `payment_method` VARCHAR(255),
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
 );
 
+-- Printer table
 CREATE TABLE `printer` (
-  `printer_id` int AUTO_INCREMENT PRIMARY KEY,
-  `printer_name` varchar(255),
-  `brand_name` varchar(255),
-  `model` varchar(255),
-  `description` varchar(255),
-  `campus_name` varchar(255),
-  `building_name` varchar(255),
-  `room_number` varchar(255),
-  `update_at` datetime,
-  `create_at` datetime,
-  `status` enum('enabled', 'disabled')
+  `printer_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `printer_name` VARCHAR(255),
+  `brand_name` VARCHAR(255),
+  `model` VARCHAR(255),
+  `campus_name` VARCHAR(255), -- Co So LTK hoac Co So Di An
+  `building_name` VARCHAR(255),
+  `room_number` VARCHAR(255),
+  `update_at` DATETIME,
+  `create_at` DATETIME,
+  `status` ENUM('enabled', 'disabled')
 );
 
-CREATE TABLE `file` (
-  `file_id` int AUTO_INCREMENT PRIMARY KEY,
-  `student_id` int,
-  `file_type_id` int,
-  `file_path` varchar(255),
-  `filename` varchar(255),
-  `status` varchar(255),
-  `size_in_bytes` int,
-  `upload_at` datetime,
-  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`file_type_id`) REFERENCES `permitted_file_type`(`file_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
+-- Permitted file type table
 CREATE TABLE `permitted_file_type` (
-  `file_type_id` int AUTO_INCREMENT PRIMARY KEY,
-  `mime_type` varchar(255)
+  `file_type_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `mime_type` VARCHAR(255)
 );
 
-CREATE TABLE `print_jobs` (
-  `print_jobs_id` int AUTO_INCREMENT PRIMARY KEY,
-  `print_config_id` int,
-  `printer_id` int,
-  `student_id` int,
-  `submit_time` datetime,
-  `total_printed_side` int,
-  `print_start_time` datetime,
-  `print_end_time` datetime,
-  FOREIGN KEY (`print_config_id`) REFERENCES `print_config`(`print_config_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`printer_id`) REFERENCES `printer`(`printer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+-- File table
+CREATE TABLE `file` (
+  `file_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `student_id` INT,
+  `file_type_id` INT,
+  `file_path` VARCHAR(255),
+  `filename` VARCHAR(255),
+  `status` VARCHAR(255),
+  `size_in_bytes` INT,
+  `upload_at` DATETIME,
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`file_type_id`) REFERENCES `permitted_file_type`(`file_type_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
 );
 
-CREATE TABLE `print_jobs_file` (
-  `print_jobs_id` int,
-  `file_id` int,
-  FOREIGN KEY (`print_jobs_id`) REFERENCES `print_jobs`(`print_jobs_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`file_id`) REFERENCES `file`(`file_id`) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
+-- Print configuration table
 CREATE TABLE `print_config` (
-  `print_config_id` int AUTO_INCREMENT PRIMARY KEY,
-  `pages_in_a4` int,
-  `pages_in_a3` int,
-  `pages_to_print` enum('even', 'odd'),
-  `number_of_copies` int,
-  `create_at` datetime,
-  `duplex` boolean
+  `print_config_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `paper_size` ENUM('A3', 'A4'),
+  `pages_to_print` ENUM('even', 'odd', 'all'),
+  `number_of_copies` INT,
+  `create_at` DATETIME,
+  `duplex` BOOLEAN
+);
+
+-- Print jobs table
+CREATE TABLE `print_jobs` (
+  `print_jobs_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `print_config_id` INT,
+  `printer_id` INT,
+  `student_id` INT,
+  `print_start_time` DATETIME,
+  `print_end_time` DATETIME,
+  FOREIGN KEY (`print_config_id`) REFERENCES `print_config`(`print_config_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`printer_id`) REFERENCES `printer`(`printer_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+
+-- Print jobs file association table
+CREATE TABLE `print_jobs_file` (
+  `print_jobs_id` INT,
+  `file_id` INT,
+  FOREIGN KEY (`print_jobs_id`) REFERENCES `print_jobs`(`print_jobs_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`file_id`) REFERENCES `file`(`file_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+-- Database setup
+DROP DATABASE IF EXISTS hcmutdb;
+CREATE DATABASE hcmutdb;
+USE hcmutdb;
+
+-- Semester page allocation table
+CREATE TABLE `SEMESTER_PAGE_ALLOCATION` (
+  `allocation_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `semester_name` VARCHAR(100),
+  `create_at` DATETIME,
+  `start_date` DATETIME,
+  `end_date` DATETIME,
+  `page_allocated` INT
+);
+
+-- User table
+CREATE TABLE `user` (
+  `user_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_name` VARCHAR(255),
+  `email` VARCHAR(255),
+  `password` VARCHAR(255),
+  `role` ENUM('student', 'spso'),
+  `create_at` DATETIME
+);
+
+-- Student table
+CREATE TABLE `student` (
+  `student_id` INT PRIMARY KEY,
+  `user_id` INT,
+  `allocation_id` INT,
+  `page_balance` INT,
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`allocation_id`) REFERENCES `SEMESTER_PAGE_ALLOCATION`(`allocation_id`)
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+
+-- Transaction table
+CREATE TABLE `transaction` (
+  `transaction_id` INT PRIMARY KEY,
+  `student_id` INT,
+  `amount_paid` DECIMAL(10,2),
+  `transaction_date` DATETIME,
+  `payment_method` VARCHAR(255),
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+
+-- Printer table
+CREATE TABLE `printer` (
+  `printer_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `printer_name` VARCHAR(255),
+  `brand_name` VARCHAR(255),
+  `model` VARCHAR(255),
+  `campus_name` VARCHAR(255), -- Co So LTK hoac Co So Di An
+  `building_name` VARCHAR(255),
+  `room_number` VARCHAR(255),
+  `update_at` DATETIME,
+  `create_at` DATETIME,
+  `status` ENUM('enabled', 'disabled')
+);
+
+-- Permitted file type table
+CREATE TABLE `permitted_file_type` (
+  `file_type_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `mime_type` VARCHAR(255)
+);
+
+-- File table
+CREATE TABLE `file` (
+  `file_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `student_id` INT,
+  `file_type_id` INT,
+  `file_path` VARCHAR(255),
+  `filename` VARCHAR(255),
+  `status` VARCHAR(255),
+  `size_in_bytes` INT,
+  `upload_at` DATETIME,
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`file_type_id`) REFERENCES `permitted_file_type`(`file_type_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+
+-- Print configuration table
+CREATE TABLE `print_config` (
+  `print_config_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `paper_size` ENUM('A3', 'A4'),
+  `pages_to_print` ENUM('even', 'odd', 'all'),
+  `number_of_copies` INT,
+  `create_at` DATETIME,
+  `duplex` BOOLEAN
+);
+
+-- Print jobs table
+CREATE TABLE `print_jobs` (
+  `print_jobs_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `print_config_id` INT,
+  `printer_id` INT,
+  `student_id` INT,
+  `print_start_time` DATETIME,
+  `print_end_time` DATETIME,
+  FOREIGN KEY (`print_config_id`) REFERENCES `print_config`(`print_config_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`printer_id`) REFERENCES `printer`(`printer_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+);
+
+-- Print jobs file association table
+CREATE TABLE `print_jobs_file` (
+  `print_jobs_id` INT,
+  `file_id` INT,
+  FOREIGN KEY (`print_jobs_id`) REFERENCES `print_jobs`(`print_jobs_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`file_id`) REFERENCES `file`(`file_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
 );

@@ -3,6 +3,7 @@ class PermittedFileType {
         this.fileTypeId = fileTypeId;
         this.mimeType = mimeType;
     }
+
     static async showPermittedFileType(db) {
         try {
             const [rows] = await db.query(`SELECT * FROM permitted_file_type ORDER BY file_type_id`);
@@ -14,4 +15,7 @@ class PermittedFileType {
     }
 }
 
-export default PermittedFileType;
+
+  
+ export default PermittedFileType;
+

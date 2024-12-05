@@ -49,7 +49,7 @@ class FileController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to fetch files: ${error.message}`
+                message: Failed to fetch files: ${error.message}
             });
         }
     };
@@ -88,7 +88,7 @@ class FileController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to create file: ${error.message}`
+                message: Failed to create file: ${error.message}
             })
         }
     };
@@ -112,7 +112,7 @@ class FileController {
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: `Failed to fetch file: ${error.message}`
+                message: Failed to fetch file: ${error.message}
             })
         }
     };

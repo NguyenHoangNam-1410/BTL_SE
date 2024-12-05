@@ -13,7 +13,9 @@ class UserController {
      * @param {Object} req - Express request object
      * @param {Object} res - Express response object
      */
+
     getUsersByID = async (req, res) => { 
+
       try{
           const userId = parseInt(req.params.user_id);  
           const user = await this.userRepository.findById(userId);
@@ -71,5 +73,4 @@ class UserController {
     }
   };
 };
-
 export default new UserController();

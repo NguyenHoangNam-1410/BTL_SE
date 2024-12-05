@@ -18,13 +18,23 @@ class FilePermittedRepository extends BaseRepository {
      */
     getFilePermitted = async () => {
         try {
+
             const permittedFileTypes = await PermittedFileType.showPermittedFileType(this.db);
             return permittedFileTypes.length ? permittedFileTypes[0] : null;
+
+            const [rows] = await this.db.query(
+                `SELECT * FROM permitted_file_type ORDER BY file_type_id LIMIT 1`
+            );
+            
+            return rows.length ? new FilePermitted(rows[0]) : FilePermitted.showPermittedFileType();
+
         } catch (error) {
             console.error(`Error getting permitted file type: ${error.message}`);
             throw new Error(`Failed to retrieve permitted file type: ${error.message}`);
         }
+
     };
+
 }
 
 export default FilePermittedRepository;

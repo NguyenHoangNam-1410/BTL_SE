@@ -27,6 +27,9 @@ class FileRepository extends BaseRepository {
             throw new Error(`Error fetching files for student ID ${studentId}: ${error.message}`);
         }
     }
+  
+  
+
     /**
      * Xoas tất cả file từ cơ sở dữ liệu của 1 student
      * @returns {Promise<Array<File>>} Mảng các đối tượng file
