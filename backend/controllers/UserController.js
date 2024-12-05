@@ -26,12 +26,8 @@ class UserController {
               })
           }
           res.status(200).json({
-            userId: user.userId,
-            userName: user.userName,
-            email: user.email,
-            password: user.password,
-            role: user.role,
-            create_at: user.createAt
+            success:true,
+            data: user
           })
       }catch(error){
           res.status(500).json({
@@ -39,7 +35,34 @@ class UserController {
               message: `Failed to fetch User: ${error.message}`
           })
       }
-  };
+    };
+
+    getUsersByUsername = async (req, res) => {
+        try{
+            
+            const username = req.params.username;
+            console.log(username)
+            const user = await this.userRepository.db.query(
+                `SELECT * FROM ${this.userRepository.tableName} WHERE user_name = ?`,
+                [username]
+            )
+            if(!user){
+                return res.status(404).json({
+                    success:false,
+                    message: "User not found"
+                })
+            }
+            res.status(200).json({
+                success:true,
+                data: user[0][0]
+              })
+        }catch(error){
+            res.status(500).json({
+                success:false,
+                message: `Failed to fetch User: ${error.message}`
+            })
+        }
+    }
       /**
      * Create user
      * @param {Object} req - Express request object
