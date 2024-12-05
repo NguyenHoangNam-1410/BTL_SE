@@ -11,9 +11,10 @@ function NavigationBar() {
   // Lấy trạng thái đăng nhập từ localStorage
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Kiểm tra trạng thái đăng nhập khi component render
   useEffect(() => {
-    const loginStatus = localStorage.getItem("isLoggedIn");
-    setIsLoggedIn(loginStatus === "true"); // Cập nhật trạng thái đăng nhập
+    const loginStatus = localStorage.getItem("isLoggedIn") === "true"; // Trả về true hoặc false từ localStorage
+    setIsLoggedIn(loginStatus);
   }, []);
 
   // State để quản lý dropdown menu
@@ -27,6 +28,7 @@ function NavigationBar() {
   // Xử lý logout
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập
+    setIsLoggedIn(false); // Đặt lại trạng thái đăng nhập
     navigate("/"); // Điều hướng về trang chủ
   };
 
@@ -37,7 +39,7 @@ function NavigationBar() {
         <span className="BKSPSS">BK SSPS</span>
       </Link>
       <ul className="navigation-menu">
-      <Link to={isLoggedIn ? "/Homepage/User" : "/"}><li>Home</li></Link>
+        <Link to={isLoggedIn ? "/Homepage/User" : "/"}><li>Home</li></Link>
         <Link to={isLoggedIn ? "/Print" : "/"}><li>Print</li></Link>
         <Link to={isLoggedIn ? "/history" : "/"}><li>History</li></Link>
         <Link to={isLoggedIn ? "/page-purchase" : "/"}><li>Page Purchase</li></Link>

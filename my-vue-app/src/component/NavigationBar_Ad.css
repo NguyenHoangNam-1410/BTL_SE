@@ -82,11 +82,10 @@
 
 .admin-dropdown-menu li {
     padding: 10px;
-    
     color: black;
     cursor: pointer;
 }
 
 .admin-dropdown-menu li:hover {
-    background-color: #f0f0f0;
+    background-color:  #a9a9a9;
 }

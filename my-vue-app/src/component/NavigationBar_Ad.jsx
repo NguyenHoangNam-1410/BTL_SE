@@ -60,8 +60,8 @@ function NavigationBar_Ad() {
       {isDropdownOpen && isAdminLoggedIn && (
         <div className="admin-dropdown-menu">
           <ul>
-            <Link to="/admin-dashboard">
-              <li>Dashboard</li>
+            <Link to="/Admin/Setup">
+              <li>Set Up</li>
             </Link>
             <li onClick={handleLogout}>Log out</li>
           </ul>

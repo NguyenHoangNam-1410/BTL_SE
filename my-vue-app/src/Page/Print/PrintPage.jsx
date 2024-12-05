@@ -1,53 +1,103 @@
 import "./PrintPage.css";
 import NavigationBar from "../../component/NavigationBar";
 import { useDropzone } from "react-dropzone";
-import { useState } from "react";
-import { IoMdPrint } from "react-icons/io";
+import { useState, useEffect } from "react";
+import { FaCloudUploadAlt, FaPrint, FaTrashAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
 function PrintPage() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [permittedFileTypes, setPermittedFileTypes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const filesPerPage = 4;
-  const [errorMessage, setErrorMessage] = useState("");
-
+  const studentId = 1; // Static student ID, can be dynamic
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Fetch permitted file types and uploaded files on mount
+    fetchPermittedFileTypes();
+    fetchUploadedFiles();
+  }, []);
+
+  const fetchPermittedFileTypes = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/files/uploadpermit");
+      const result = await response.json();
+      if (result.success) {
+        setPermittedFileTypes(result.data.map((type) => type.mime_type));
+      } else {
+        toast.error("Failed to fetch permitted file types.");
+      }
+    } catch (error) {
+      console.error("Error fetching permitted file types:", error);
+      toast.error("Error fetching permitted file types from the server.");
+    }
+  };
+
+  const fetchUploadedFiles = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/files/${studentId}`);
+      const result = await response.json();
+      if (result.success) {
+        setUploadedFiles(result.files); // Adjust based on API structure
+      } else {
+        toast.error("Failed to fetch uploaded files.");
+      }
+    } catch (error) {
+      console.error("Error fetching uploaded files:", error);
+      toast.error("Error fetching uploaded files from the server.");
+    }
+  };
+
+  const uploadFileToServer = async (file) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/files/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          student_id: studentId,
+          file_type_id: determineFileTypeId(file),
+          file_path: "D:/", // Update based on your requirements
+          filename: file.name,
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast.success("File uploaded successfully!");
+        fetchUploadedFiles(); // Refresh file list
+      } else {
+        toast.error("File upload failed.");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Error uploading file to the server.");
+    }
+  };
+
   const { getRootProps, getInputProps } = useDropzone({
-    accept: ".pdf,.doc,.docx,.xlsx", // Các file hợp lệ
     onDrop: (acceptedFiles) => {
-      setErrorMessage(""); // Xóa thông báo lỗi mỗi khi người dùng tải lại tệp mới
-      setUploadedFiles((prevFiles) =>
-        prevFiles.concat(
-          acceptedFiles.map((file) => ({
-            path: file.name,
-            size: file.size,
-          }))
-        )
-      );
+      acceptedFiles.forEach((file) => {
+        if (permittedFileTypes.includes(file.type)) {
+          uploadFileToServer(file); // Upload immediately if type is valid
+        } else {
+          toast.error(
+            <>
+              Invalid file type: <strong>{file.name}</strong>. Only allowed types: {permittedFileTypes.join(", ")}.
+            </>
+          );
+        }
+      });
     },
   });
 
-  const removeFile = (index) => {
-    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  };
-
   const handlePrint = (fileName) => {
-    // Kiểm tra định dạng tệp khi nhấn nút Print
-    const validExtensions = [".pdf", ".doc", ".docx", ".xlsx"];
-    const fileExtension = fileName.slice(fileName.lastIndexOf("."));
-
-    if (!validExtensions.includes(fileExtension)) {
-      setErrorMessage([
-        "Invalid file type!",
-        "Please upload a .pdf, .doc, .docx, or .xlsx file.",
-      ]);
-    } else {
-      setErrorMessage(""); // Xóa thông báo lỗi nếu file hợp lệ
-      navigate("/Print/PrintConfig", {
-        state: { fileName }, // Truyền fileName qua state
-      });
-    }
+    toast.success(`Preparing to print: ${fileName}`);
+    navigate("/Print/PrintConfig", {
+      state: { fileName },
+    });
   };
 
   const indexOfLastFile = currentPage * filesPerPage;
@@ -61,50 +111,63 @@ function PrintPage() {
     pageNumbers.push(i);
   }
 
-  const closeModal = () => {
-    setErrorMessage(""); // Đóng modal khi bấm OK
+  const determineFileTypeId = (file) => {
+    const fileType = permittedFileTypes.find((type) => type === file.type);
+    return fileType ? permittedFileTypes.indexOf(fileType) + 1 : null;
   };
 
   return (
     <div>
       <NavigationBar />
-      <div className={`print_container ${errorMessage ? "blurred" : ""}`}>
+      <ToastContainer />
+      <div className="print_container">
         <div className="drag_container">
-          <div className="drag" {...getRootProps({ className: "dropzone" })}>
+          <motion.div
+            className="drag"
+            {...getRootProps({ className: "dropzone" })}
+            initial={{ opacity: 0.8, scale: 0.95 }}
+            whileHover={{ scale: 1.05, boxShadow: "0px 4px 8px rgba(0,0,0,0.3)" }}
+            transition={{ duration: 0.3 }}
+          >
             <input {...getInputProps()} />
-            <img
-              src="https://img.icons8.com/ios/452/upload-to-cloud.png"
-              alt="upload"
-            />
+            <FaCloudUploadAlt className="upload-icon" />
             <p>Drag and drop your files here</p>
             <p>-- Or --</p>
             <button>Browse</button>
-          </div>
+          </motion.div>
         </div>
 
         <div className="file_list_container">
           <h3>List of Documents</h3>
           <ul className="file_list">
             {currentFiles.map((file, index) => (
-              <li key={index} className="file_item">
+              <motion.li
+                key={index}
+                className="file_item"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.03, backgroundColor: "#f9f9f9" }}
+                transition={{ duration: 0.3 }}
+              >
                 <span>
-                  {file.path} - {(file.size / 1024).toFixed(2)} KB
+                  {file.filename}
                 </span>
                 <div className="file_actions">
-                  <button
+                  <motion.button
                     className="print_button"
-                    onClick={() => handlePrint(file.path)}
+                    onClick={() => handlePrint(file.filename)}
+                    whileHover={{ scale: 1.2, color: "#4caf50" }}
                   >
-                    <IoMdPrint size={20} />
-                  </button>
-                  <button
+                    <FaPrint size={20} />
+                  </motion.button>
+                  <motion.button
                     className="remove_button"
-                    onClick={() => removeFile(index)}
+                    whileHover={{ scale: 1.2, color: "#f44336" }}
                   >
-                    ✖
-                  </button>
+                    <FaTrashAlt size={20} />
+                  </motion.button>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
 
@@ -133,22 +196,6 @@ function PrintPage() {
           </div>
         </div>
       </div>
-
-      {/* Modal thông báo lỗi */}
-      {errorMessage && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            {Array.isArray(errorMessage) ? (
-              errorMessage.map((msg, index) => <p key={index}>{msg}</p>)
-            ) : (
-              <p>{errorMessage}</p>
-            )}
-            <button className="ok-button" onClick={closeModal}>
-              OK
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

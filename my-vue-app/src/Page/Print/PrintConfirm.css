@@ -1,0 +1,137 @@
+.print-confirm-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* background-color: rgba(102, 232, 244, 0.3); */
+    background-image: url(../../assets/sky.png);
+    background-size: cover; /* Đảm bảo ảnh nền phủ kín */
+    background-position: center; /* Căn giữa ảnh nền */
+    background-repeat: no-repeat; /* Không cho phép lặp ảnh nền */
+  }
+  
+  .print-confirm-box {
+    background-color: rgb(231, 255, 255);
+    opacity: 95%;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    margin-top: -100px;
+  }
+  
+  h3 {
+    /* margin-bottom: 2px; */
+    /* padding-top: -200px; */
+    font-size: 30px;
+    color:rgb(55, 0, 255)
+  }
+  
+  hr {
+    margin-bottom: 40px;
+  }
+  
+  .print-details{
+    border: 1px solid white;
+    width: 500px;
+    margin-left: 100px;
+    background-color: white;
+    padding-bottom: 10px;
+    opacity: 100%;
+  }
+
+  .print-details p {
+    text-align: left;
+    padding-left: 10px;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .cancel-btn {
+    background-color: #ff6464;
+  color: #050505;
+    margin-left: -10px;
+  }
+
+
+  
+  .confirm-btn {
+    background-color: #007bff;
+  color: #fff;
+  }
+
+  .confirm-btn:hover{
+    background-color: #0056b3;
+  }
+  
+  /* Làm mờ nền khi modal hiển thị */
+.blur-background {
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  
+  /* Overlay của modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Làm tối nền */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  /* Hộp Modal */
+  .modal-box {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  .modal-box p {
+    font-size: 1.3rem;
+    margin-top: -20px;
+    margin-bottom: 20px;
+    line-height: 1.8; /* Tăng khoảng cách giữa các dòng */
+  }
+  
+  .modal-box .ok-btn {
+    background-color: #4CAF50;
+    color: white;
+    /* padding: 10px 20px; */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: -20px;
+    float: right; /* Căn nút về phía bên phải */
+  }
+  
+  .modal-box .ok-btn:hover {
+    background-color: #45a049;
+  }

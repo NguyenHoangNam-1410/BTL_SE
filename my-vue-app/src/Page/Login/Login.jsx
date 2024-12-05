@@ -5,17 +5,33 @@ import logo from "../../assets/logo.png";
 import "./Login.css";
 
 function Login() {
-  const [username, setUsername] = useState(""); // State để lưu username
-  const [password, setPassword] = useState(""); // State để lưu password
+  const [username, setUsername] = useState(""); // State to store username
+  const [password, setPassword] = useState(""); // State to store password
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Giả sử logic kiểm tra đơn giản (thay bằng API gọi đến server trong thực tế)
-    if (username === "nhvu2311@gmail.com" && password === "1234") {
-      localStorage.setItem("isLoggedIn", "true"); // Lưu trạng thái đăng nhập
-      navigate("/Homepage/User"); // Điều hướng đến trang User Home
-    } else {
-      alert("Invalid username or password"); // Hiển thị cảnh báo nếu sai thông tin
+  const handleLogin = async () => {
+    try {
+      // Fetch user data by username
+      const response = await fetch(`http://localhost:5000/api/users/${username}`);
+      const result = await response.json();
+      console.log(result.data)
+      if (!result.success) {
+        alert("Invalid username or password");
+        return;
+      }
+
+      const user = result.data;
+
+      // Check if the password and role match
+      if (user.password === password && user.role === "student") {
+        localStorage.setItem("isLoggedIn", "true"); // Store login state
+        navigate("/Homepage/User"); // Navigate to User Home
+      } else {
+        alert("Invalid username, password, or role");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Failed to log in. Please try again.");
     }
   };
 
@@ -33,7 +49,7 @@ function Login() {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)} // Cập nhật username
+              onChange={(e) => setUsername(e.target.value)} // Update username
             />
           </div>
           <div className="pass">
@@ -41,7 +57,7 @@ function Login() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)} // Cập nhật password
+              onChange={(e) => setPassword(e.target.value)} // Update password
             />
           </div>
         </div>
@@ -49,7 +65,7 @@ function Login() {
           <Link to="/">
             <button>Cancel</button>
           </Link>
-          <button onClick={handleLogin}>Login</button> {/* Gắn sự kiện login */}
+          <button onClick={handleLogin}>Login</button> {/* Attach login event */}
         </div>
       </div>
     </div>

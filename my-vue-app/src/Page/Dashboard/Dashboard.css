@@ -1,0 +1,121 @@
+/* General styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    height: 100vh; /* Set the height of the body to the full viewport */
+  }
+  
+  /* Dashboard container */
+  .dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px); /* Fill the screen minus the navbar's height */
+    background-color: #E7F0F8;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin: 0; /* Remove default margin */
+    padding: 30px; /* Add padding inside the card */
+    box-sizing: border-box; /* Ensure padding doesn’t affect width/height */
+  }
+  
+  /* Dashboard Title */
+  .dashboard-title {
+    text-align: center;
+    color: #008b8b;
+    margin-bottom: 30px;
+    font-size: 38px; /* Larger title font */
+    font-weight: bold;
+  }
+  
+  /* Student Info Section */
+  .student-info{
+    width: 90%;
+    margin-bottom: 45px;
+    padding: 20px;
+    border: 1px solid #696969;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    background-color: white;
+  }
+  
+  .balance-info {
+    width: 90%;
+    margin-bottom: 70px;
+    padding: 20px;
+    border: 1px solid #696969;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    background-color: white;
+  }
+  .student-info h2,
+  .balance-info h2 {
+    font-size: 27px;
+    color: #444;
+    margin-bottom: 35px;
+    margin-left: 100px;
+  }
+  
+  .student-info p {
+    font-size: 25px;
+    margin: 25px 0;
+    margin-left: 145px;
+  }
+  
+  /* Balance Section */
+  .balance-display {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .balance-amount {
+    display: block;
+    font-size: 32px;
+    color: #008b8b;
+    font-weight: bold;
+  }
+  
+  .balance-label {
+    color: #666;
+    font-size: 19px;
+  }
+  
+  .page-purchase-button {
+    display: block;
+    width: 87%;
+    padding: 15px;
+    font-size: 20px;
+    color: white;
+    background-color: #008b8b;
+    border: rgba(0, 0, 0, 0.678) 1px solid;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0 auto; /* Center the button */
+  }
+  .page-purchase-button:hover {
+    background-color: #006f6f;
+  }
+  
+.transaction-link {
+  display: block;
+  width: 87%;
+  padding: 15px;
+  font-size: 20px;
+  color: #008b8b;
+  background-color: white;
+  border: rgba(0, 0, 0, 0.678) 1px solid;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  margin: 20px auto 0; 
+  transition: background-color 0.3s ease;
+}
+
+.transaction-link:hover {
+  background-color: #cccccc;
+}
