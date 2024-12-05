@@ -23,10 +23,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none; /* Loại bỏ gạch chân mặc định */
+    list-style: none; /* Đảm bảo không có ký tự đầu dòng */
 }
 
 .admin-navigation-menu li:hover{
     background-color: #00879f;
+    text-decoration: none;
+}
+
+.admin-navigation-menu a, 
+.admin-navigation-menu a:hover {
+    text-decoration: none; /* Loại bỏ gạch chân trên thẻ <Link> */
+    color: inherit; /* Giữ nguyên màu chữ */
 }
 
 /* Logo */

@@ -9,12 +9,29 @@ function Login_Admin() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleAdminLogin = () => {
-    if (username === "admin@gmail.com" && password === "123") {
-      localStorage.setItem("isAdminLoggedIn", "true"); 
-      navigate("/Homepage/Admin");
-    } else {
-      alert("Invalid admin credentials");
+  const handleAdminLogin = async () => {
+    try {
+      // Fetch user data by username
+      const response = await fetch(`http://localhost:5000/api/users/${username}`);
+      const result = await response.json();
+      console.log(result.data)
+      if (!result.success) {
+        alert("Invalid username or password");
+        return;
+      }
+
+      const user = result.data;
+
+      // Check if the password and role match
+      if (user.password === password && user.role === "spso") {
+        localStorage.setItem("isAdminLoggedIn", "true"); // Store login state
+        navigate("/Homepage/Admin"); // Navigate to User Home
+      } else {
+        alert("Invalid username, password, or role");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Failed to log in. Please try again.");
     }
   };
 

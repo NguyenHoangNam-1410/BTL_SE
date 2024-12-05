@@ -9,7 +9,7 @@ function History() {
   const [error, setError] = useState(null);
 
   const user_id = 2; 
-  const itemsPerPage = 20; 
+  const itemsPerPage = 15; 
 
   const generateRandomTime = () => {
     const seconds = Math.floor(Math.random() * (60 - 30 + 1)) + 30; 
