@@ -33,13 +33,13 @@ function NavigationBar_Ad() {
   return (
     <nav className="admin-navigation-bar">
       <img src={logo} alt="Logo" className="admin-navigation-logo" />
-      <Link to="/">
+      <Link to={isAdminLoggedIn ? "/Homepage/Admin" : "/"}>
         <span className="admin-BKSPSS">BK SSPS</span>
       </Link>
       <ul className="admin-navigation-menu">
         <Link to={isAdminLoggedIn ? "/Homepage/Admin" : "/"}><li>Home</li></Link>
         <Link to={isAdminLoggedIn ? "/manage" : "/"}><li>Manage</li></Link>
-        <Link to={isAdminLoggedIn ? "/history" : "/"}><li>History</li></Link>
+        <Link to={isAdminLoggedIn ? "/admin/history" : "/"}><li>History</li></Link>
         <Link to={isAdminLoggedIn ? "/report" : "/"}><li>Report</li></Link>
       </ul>
 

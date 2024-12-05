@@ -67,6 +67,11 @@
     text-decoration: none;
 }
 
+.admin-navigation-bar .admin-BKSPSS:hover{
+    color: white;
+    text-decoration: none;
+}
+
 
 /* Dropdown menu */
 .admin-dropdown-menu {

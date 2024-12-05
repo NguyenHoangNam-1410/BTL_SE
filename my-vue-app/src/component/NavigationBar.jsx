@@ -35,7 +35,7 @@ function NavigationBar() {
   return (
     <nav className="navigation-bar">
       <img src={logo} alt="Logo" className="navigation-logo" /> 
-      <Link to="/">
+      <Link to={isLoggedIn ? "/Homepage/User" : "/"}>
         <span className="BKSPSS">BK SSPS</span>
       </Link>
       <ul className="navigation-menu">
