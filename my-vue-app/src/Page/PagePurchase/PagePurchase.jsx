@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import NavigationBar from "../../component/NavigationBar";
 import "./PagePurchase.css";
 
+
+
+
 function PagePurchase() {
   const [numPages, setNumPages] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("bkpay");
   const pricePerPage = 500;
   const totalPrice = numPages * pricePerPage;
-
-  const userId = 2;
+  //! NOTES---------------------------------------------
+  // const studentId = localStorage.getItem("student_id");
+  const studentId = 1;
+  //! --------------------------------------------------
   const handleCancel = () => {
     window.history.back(); 
   };
@@ -20,14 +25,14 @@ function PagePurchase() {
     }
 
     const transactionData = {
-      student_id: userId, 
+      student_id: studentId, 
       amount_paid: totalPrice,
-      transaction_date: new Date().toISOString(),
+      transaction_date: new Date().toISOString().split('T')[0], 
       payment_method: paymentMethod,
     };
 
     try {
-      const response = await fetch("/api/transactions/purchase", {
+      const response = await fetch("http://localhost:5000/api/transactions/purchase", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,6 +44,16 @@ function PagePurchase() {
 
       if (response.ok && result.success) {
         alert(`Purchase successful! You have purchased ${numPages} pages for ${totalPrice} VND.`);
+        let studentInfo = localStorage.getItem("studentInfo");
+
+        studentInfo = JSON.parse(studentInfo);
+        studentInfo.page_balance = (studentInfo.page_balance || 0) + numPages;
+        
+        const updatedStudentInfo = JSON.stringify(studentInfo);
+        localStorage.removeItem('studentInfo')
+        localStorage.setItem("studentInfo", updatedStudentInfo);
+        console.log("SECOND: ", JSON.parse(localStorage.getItem("studentInfo")))
+
       } else {
         alert(`Purchase failed: ${result.message || "Unknown error occurred."}`);
       }
@@ -89,8 +104,7 @@ function PagePurchase() {
             <button type="button" className="cancel-button" onClick={handleCancel}>
               Cancel
             </button>
-            <button
-              type="button"
+            <button type="button"
               className="purchase-button"
               onClick={handlePurchase}
             >

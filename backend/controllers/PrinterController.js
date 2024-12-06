@@ -20,19 +20,19 @@ class PrinterController {
         try{
             const printers = await this.printerRepository.findAll();
             console.log(printers)
-            const formattedPrinters = printers.map(printer => ({
-                printer_id: printer.printerId,
-                printer_name: printer.printerName,
-                brand_name: printer.brandName,
-                model: printer.model,
-                description: printer.description,
-                campus_name: printer.campusName,
-                building_room_name: printer.buildingName + ' ' + printer.roomNumber,
-                update_at: printer.updatedAt,
-                create_at: printer.createdAt,
-                status: printer.status
-            }));
-            res.status(200).json(formattedPrinters);
+            // const formattedPrinters = printers.map(printer => ({
+            //     printer_id: printer.printerId,
+            //     printer_name: printer.printerName,
+            //     brand_name: printer.brandName,
+            //     model: printer.model,
+            //     description: printer.description,
+            //     campus_name: printer.campusName,
+            //     building_room_name: printer.buildingName + ' ' + printer.roomNumber,
+            //     update_at: printer.updatedAt,
+            //     create_at: printer.createdAt,
+            //     status: printer.status
+            // }));
+            res.status(200).json(printers);
         }catch(error){ 
             res.status(500).json({
                 success:false,
@@ -86,6 +86,9 @@ class PrinterController {
             const printerId = parseInt(req.params.printer_id);
             const {status} = req.body;
 
+            console.log(status)
+            console.log(printerId)
+
             if (!['enabled', 'disabled'].includes(status.toLowerCase())){
                 return res.status(400).json({
                     success:false,
@@ -123,19 +126,19 @@ class PrinterController {
                 brand_name,
                 model,
                 campus_name,
-                building_room_name,
+                building_name,
+                room_number,
                 status
             } = req.body;
 
-            const [buildingName, roomNumber] = building_room_name.split('-');
            
             const newPrinter = await this.printerRepository.create({
                 printer_name,
                 brand_name,
                 model,
                 campus_name,
-                building_name: buildingName,
-                room_number: roomNumber,
+                building_name: building_name,
+                room_number: room_number,
                 status: status.toLowerCase(),
                 update_at: new Date(),
                 create_at : new Date()

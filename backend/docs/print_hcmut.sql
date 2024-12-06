@@ -78,6 +78,8 @@ CREATE TABLE `file` (
   `file_path` VARCHAR(255),
   `filename` VARCHAR(255),
   `upload_at` DATETIME,
+  `number_of_pages` INT, 
+  `size`  BIGINT NOT NULL DEFAULT 0,
   FOREIGN KEY (`student_id`) REFERENCES `student`(`student_id`) 
     ON DELETE CASCADE 
     ON UPDATE CASCADE,
@@ -104,6 +106,7 @@ CREATE TABLE `print_jobs` (
   `student_id` INT,
   `print_start_time` DATETIME,
   `print_end_time` DATETIME,
+  `total_page_cost` INT,
   FOREIGN KEY (`print_config_id`) REFERENCES `print_config`(`print_config_id`) 
     ON DELETE CASCADE 
     ON UPDATE CASCADE,
@@ -126,4 +129,38 @@ CREATE TABLE `print_jobs_file` (
     ON DELETE CASCADE 
     ON UPDATE CASCADE
 );
+
+
+
+DELIMITER //
+
+CREATE TRIGGER after_transaction_insert
+AFTER INSERT ON `transaction`
+FOR EACH ROW
+BEGIN
+	-- Update the page_balance by adding new pages (amount_paid / 1000)
+    -- assuming 1000 VND per page	
+    UPDATE student	
+    SET page_balance = page_balance + FLOOR(NEW.amount_paid / 500)	
+    WHERE student_id = NEW.student_id;
+END//
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER after_print_job_insert
+AFTER INSERT ON `print_jobs`
+FOR EACH ROW
+BEGIN
+    UPDATE student
+    SET page_balance = page_balance - NEW.total_page_cost 
+    WHERE student_id = NEW.student_id;
+END//
+DELIMITER ;
+
+
+
+
+
+
 

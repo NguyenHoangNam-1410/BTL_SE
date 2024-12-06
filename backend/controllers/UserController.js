@@ -68,6 +68,47 @@ class UserController {
      * @param {Object} req - Express request object
      * @param {Object} res - Express response object
      */
+
+    getStudentByUsername = async(req,res) => {
+        try{
+            const username = req.params.username;
+            const user = await this.userRepository.db.query(
+                `SELECT 
+                    u.user_id,
+                    u.user_name,
+                    u.email,
+                    u.password,
+                    u.role,
+                    u.create_at,
+                    s.student_id,
+                    s.page_balance,
+                    spa.semester_name,
+                    spa.start_date,
+                    spa.end_date,
+                    spa.page_allocated
+                FROM USER u
+                JOIN STUDENT s ON u.user_id = s.user_id
+                JOIN SEMESTER_PAGE_ALLOCATION spa ON s.allocation_id = spa.allocation_id
+                WHERE u.user_name =  ?
+                `, [username])
+
+                if(!user){
+                    return res.status(404).json({
+                        success:false,
+                        message: "User not found"
+                    })
+                }
+                res.status(200).json({
+                    success:true,
+                    data: user[0][0]
+                }) 
+        }catch(error){
+            res.status(500).json({
+                success:false,
+                message: `Failed to fetch User: ${error.message}`
+            })
+        }
+    }
   createUser = async (req, res) => {
     try{
         const{

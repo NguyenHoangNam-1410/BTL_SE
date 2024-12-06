@@ -28,6 +28,7 @@ function NavigationBar() {
   // Xử lý logout
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập
+    localStorage.removeItem("studentId");
     setIsLoggedIn(false); // Đặt lại trạng thái đăng nhập
     navigate("/"); // Điều hướng về trang chủ
   };

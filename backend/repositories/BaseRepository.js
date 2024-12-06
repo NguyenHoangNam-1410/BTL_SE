@@ -25,7 +25,7 @@ class BaseRepository {
 
     async create(entity) {
         try {
-            console.log(entity);
+            
             const [result] = await this.db.query(
                 `INSERT INTO ${this.tableName} SET ?`,
                 entity

@@ -11,8 +11,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      // Fetch user data by username
-      const response = await fetch(`http://localhost:5000/api/users/${username}`);
+      const response = await fetch(`http://localhost:5000/api/users/student/${username}`);
       const result = await response.json();
       console.log(result.data)
       if (!result.success) {
@@ -21,10 +20,10 @@ function Login() {
       }
 
       const user = result.data;
-
-      // Check if the password and role match
+      console.log(user)
       if (user.password === password && user.role === "student") {
         localStorage.setItem("isLoggedIn", "true"); // Store login state
+        localStorage.setItem("studentInfo", JSON.stringify(user))
         navigate("/Homepage/User"); // Navigate to User Home
       } else {
         alert("Invalid username, password, or role");

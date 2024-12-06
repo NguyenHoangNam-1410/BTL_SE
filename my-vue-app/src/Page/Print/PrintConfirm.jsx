@@ -3,10 +3,18 @@ import { useState } from 'react';
 import './PrintConfirm.css';
 import NavigationBar from '../../component/NavigationBar';
 
+const studentInfo = localStorage.getItem("studentInfo");
+
+
 function PrintConfirm() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { fileName, copies, paperSize, totalPages, remainingPages, locationToGetFile } = location.state || {};
+  const { printJobData, file, fileName, copies, paperSize, totalPages, remainingPages, locationToGetFile } = location.state || {};
+  console.log(printJobData)
+
+  const studentId = JSON.parse(studentInfo).student_id
+  console.log(printJobData)
+
   const [showModal, setShowModal] = useState(false);
 
   if (!fileName) {
@@ -14,9 +22,10 @@ function PrintConfirm() {
   }
 
   const handleCancel = () => {
-    // Truyền lại state khi quay lại PrintConfig
     navigate("/Print/PrintConfig", {
       state: {
+        printJobData,
+        file,
         fileName,
         copies,
         paperSize,
@@ -27,13 +36,36 @@ function PrintConfirm() {
     });
   };
 
-  const handleConfirm = () => {
-    setShowModal(true); // Hiển thị modal khi bấm Confirm
+  const handleConfirm = async () => {
+    const response = await fetch('http://localhost:5000/api/print-jobs', {
+        method: 'POST',
+          headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(printJobData)
+    });
+
+    if (response.ok){
+      setShowModal(true);
+
+      let studentInfo = localStorage.getItem("studentInfo");
+
+      studentInfo = JSON.parse(studentInfo);
+      studentInfo.page_balance = remainingPages;
+      
+      const updatedStudentInfo = JSON.stringify(studentInfo);
+      localStorage.removeItem('studentInfo')
+      localStorage.setItem("studentInfo", updatedStudentInfo);
+      console.log("SECOND: ", JSON.parse(localStorage.getItem("studentInfo")))
+    }
+    else{
+      console.error("Error")
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false); // Ẩn modal
-    navigate("/Print"); // Chuyển qua trang Status
+    navigate("/Print"); 
   };
 
   return (
@@ -45,7 +77,7 @@ function PrintConfirm() {
           <hr />
           <div className="print-details">
             <p><strong>File Name:</strong> {fileName}</p>
-            <p><strong>Number of Pages:</strong> {copies}</p>
+            <p><strong>Number of copies:</strong> {copies}</p>
             <p><strong>Type of Page:</strong> {paperSize}</p>
             <p><strong>Number of Pages after Conversion:</strong> {totalPages}</p>
             <p><strong>Remaining Pages:</strong> {remainingPages}</p>

@@ -1,13 +1,13 @@
 -- Insert an SPSO user
 USE hcmutdb;
 INSERT INTO `user` (user_name, email, password, role, create_at)
-VALUES ('SPSO Admin', 'spso@example.com', 'securepassword', 'spso', NOW());
+VALUES ('SPSOAdmin', 'spso@example.com', 'securepassword', 'spso', NOW());
 
 -- Insert student users
 INSERT INTO `user` (user_name, email, password, role, create_at)
 VALUES 
-('Student One', 'student1@example.com', 'password123', 'student', NOW()),
-('Student Two', 'student2@example.com', 'password123', 'student', NOW());
+('StudentOne', 'student1@example.com', 'password123', 'student', NOW()),
+('StudentTwo', 'student2@example.com', 'password123', 'student', NOW());
 
 
 INSERT INTO `SEMESTER_PAGE_ALLOCATION` (semester_name, create_at, start_date, end_date, page_allocated)
@@ -17,28 +17,31 @@ VALUES
 -- Insert students
 INSERT INTO `student` (student_id, user_id, allocation_id, page_balance)
 VALUES 
-(1, 2, 1, 500), 
-(2, 3, 1, 500);
+(1, 2, 1, 400), 
+(2, 3, 1, 400);
 
 -- Insert permitted file types
 INSERT INTO `permitted_file_type` (mime_type)
 VALUES 
-('application/pdf'), 
-('image/png'), 
-('image/jpeg');
+('application/pdf');
 
--- Insert files associated with the students
-INSERT INTO `file` (student_id, file_type_id, file_path, filename,  upload_at)
-VALUES 
-(1, 1, '/uploads/student1/', 'document1.pdf',  NOW()),
-(1, 2, '/uploads/student1/', 'image1.png', NOW()),
-(2, 1, '/uploads/student2/', 'document2.pdf', NOW());
+
+
 
 -- Insert printers
 INSERT INTO `printer` (printer_name, brand_name, model, campus_name, building_name, room_number, update_at, create_at, status)
 VALUES 
-('Printer 1', 'HP', 'LaserJet 1020', 'LTK Campus', 'B4', 'Room 101', NOW(), NOW(), 'enabled'),
-('Printer 2', 'Canon', 'PIXMA G3010', 'Di An Campus', 'C5', 'Room 202', NOW(), NOW(), 'enabled');
+('Printer 1', 'HP', 'LaserJet 1020', 'LTK Campus', 'B4', '505', NOW(), NOW(), 'enabled'),
+('Printer 2', 'Canon', 'PIXMA G3010', 'LTK Campus', 'A4', '303', NOW(), NOW(), 'enabled'),
+('Printer 3', 'HP', 'LaserJet 1020', 'LTK Campus', 'B3', '101', NOW(), NOW(), 'enabled'),
+('Printer 4', 'Canon', 'PIXMA G3010', 'LTK Campus', 'A2', '202', NOW(), NOW(), 'enabled'),
+('Printer 5', 'HP', 'LaserJet 1020', 'LTK Campus', 'C1', '101', NOW(), NOW(), 'enabled'),
+('Printer 6', 'HP', 'LaserJet 1020', 'Di An Campus', 'H1', '402', NOW(), NOW(), 'enabled'),
+('Printer 7', 'Canon', 'PIXMA G3010', 'Di An Campus', 'H4', '503', NOW(), NOW(), 'enabled'),
+('Printer 8', 'HP', 'LaserJet 1020', 'Di An Campus', 'H6', '102', NOW(), NOW(), 'enabled'),
+('Printer 9', 'Canon', 'PIXMA G3010', 'Di An Campus', 'H6', '405', NOW(), NOW(), 'enabled'),
+('Printer 10', 'HP', 'LaserJet 1020', 'Di An Campus', 'H1', '207', NOW(), NOW(), 'enabled');
+
 
 -- Insert default print configuration
 INSERT INTO `print_config` (paper_size, pages_to_print, number_of_copies, create_at, duplex)

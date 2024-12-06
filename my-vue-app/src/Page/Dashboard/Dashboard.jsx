@@ -3,52 +3,34 @@ import { useNavigate } from "react-router-dom";
 import NavigationBar from "../../component/NavigationBar";
 import './Dashboard.css';
 
+const studentInfo = localStorage.getItem("studentInfo");
+
 function Dashboard() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState(null);
-    const userId = 2; 
+
+    const userName = JSON.parse(studentInfo).user_name;
 
     useEffect(() => {
-        // Simulating API call with sample data
         const fetchUserData = async () => {
             try {
-                const sampleData = {
-                    user_name: "Nguyen Van A",
-                    student_id: "2252000",
-                    semester_name: "20241",
-                    default_page_allocated: 100,
-                    page_balance: 65,
-                };
+                const response = await fetch(`http://localhost:5000/api/users/student/${userName}`);
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                const data = await response.json();
 
-                // Simulating a slight delay
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                setUserData(sampleData);
+                console.log(data.data)
+                setUserData(data.data);
             } catch (err) {
                 console.error("Failed to fetch user data:", err);
-                setError("Failed to load user data");
+                setError(err.message);
             }
         };
 
         fetchUserData();
-    }, [userId, navigate]);
-    // useEffect(() => {
-    //     const fetchUserData = async () => {
-    //         try {
-    //             const response = await fetch(`/api/users/${userId}`);
-    //             if (!response.ok) {
-    //                 throw new Error(`Error: ${response.statusText}`);
-    //             }
-    //             const data = await response.json();
-    //             setUserData(data);
-    //         } catch (err) {
-    //             console.error("Failed to fetch user data:", err);
-    //             setError(err.message);
-    //         }
-    //     };
-
-    //     fetchUserData();
-    // }, [userId, navigate]);
+    }, []);
 
     const handlePagePurchase = () => {
         navigate("/page-purchase");
@@ -75,21 +57,32 @@ function Dashboard() {
                 <section className="student-info">
                     <h2>👤 Student Information</h2>
                     <p><strong>Full Name:</strong> {userData.user_name}</p>
+                    <p><strong>Email:</strong> {userData.email}</p>
+                    <p><strong>Role:</strong> {userData.role}</p>
                     <p><strong>ID:</strong> {userData.student_id}</p>
                     <p><strong>Current Semester:</strong> {userData.semester_name || "N/A"}</p>
-                    <p><strong>Default Page Allocated:</strong> {userData.default_page_allocated || 0}</p>
+                    <p><strong>Start Date:</strong> {new Date(userData.start_date).toLocaleDateString()}</p>
+                    <p><strong>End Date:</strong> {new Date(userData.end_date).toLocaleDateString()}</p>
                 </section>
 
                 <section className="balance-info">
                     <h2>📂 Balance Information</h2>
+                    <p><strong>Default Page Allocation:</strong> {userData.page_allocated || 0}</p>
+                
+                    <p><strong>Current Balance:</strong> {userData.page_balance }</p>
                     <div className="balance-display">
                         <span className="balance-amount">{userData.page_balance}</span>
-                        <span className="balance-label">Current Balance</span>
+                        <span className="balance-label">Page Balance</span>
                     </div>
                     <button className="page-purchase-button" onClick={handlePagePurchase}>Page Purchase</button>
                     <button className="transaction-link" onClick={handleTransactionHistory}>
                         View Transaction History
                     </button>
+                </section>
+
+                <section className="additional-info">
+                    <h2>🗓️ Timestamps</h2>
+                    <p><strong>Account Created At:</strong> {new Date(userData.create_at).toLocaleString()}</p>
                 </section>
             </div>
         </>

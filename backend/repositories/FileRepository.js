@@ -1,5 +1,6 @@
 import BaseRepository from './BaseRepository.js';
 import File from '../models/File.js';
+import FileManager from '../utils/FileManager.js';
 
 /**
  * Lớp Repository để xử lý cấu hình in ấn
@@ -19,15 +20,19 @@ class FileRepository extends BaseRepository {
      */
     findByStudentId = async (studentId) => {
         try {
+
             const [rows] = await this.db.query(`SELECT * FROM ${this.tableName} WHERE student_id = ?`, [studentId]);
-            console.log(`Files for student ID ${studentId}: `, rows);
-            // const objectFiles = rows.map(row => new File(row));
-            return rows;
+            console.log(rows);
+            const fileWithSize = await Promise.all(rows.map(async (file) => {
+                const size = await FileManager.getFileSize(file.file_path);
+                return {... file, size}
+            }));
+            console.log(`Files for student ID ${studentId}: `, fileWithSize);
+            return fileWithSize;
         } catch (error) {
             throw new Error(`Error fetching files for student ID ${studentId}: ${error.message}`);
         }
     }
-  
   
 
     /**

@@ -1,4 +1,3 @@
-
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
 import HomePage from "./Page/Home/Home.jsx";
 import ChooseRole from "./Page/Role/Role.jsx";
@@ -17,6 +16,8 @@ import Help from "./Page/Help/Help.jsx";
 import TransactionHistory from "./Page/TransactionHistory/TransactionHistory.jsx";
 import Report from "./Page/Report/Report.jsx";
 import DetailReport from "./Page/DetailReport/DetailReport.jsx";
+import Admin_History from "./Page/SPSO_History/SPSO_History.jsx";
+import Manage from "./Page/Manage/Manage.jsx";
 
 
 function App() {
@@ -37,10 +38,11 @@ function App() {
         <Route path="/page-purchase" element={<PagePurchase/>}/>
         <Route path="/Help" element={<Help/>}/>
         <Route path="/transaction-history" element={<TransactionHistory/>}/>
-
         <Route path="/history" element={<History/>}/>
         <Route path="/report" element={<Report />} />
       <Route path="/detail-report" element={<DetailReport />} />
+      <Route path="/manage" element={<Manage/>}/>
+      <Route path="/admin/history" element={<Admin_History/>}/>
       </Routes>
     </Router>
   );

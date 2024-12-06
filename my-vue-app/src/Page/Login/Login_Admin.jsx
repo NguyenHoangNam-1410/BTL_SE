@@ -12,7 +12,8 @@ function Login_Admin() {
   const handleAdminLogin = async () => {
     try {
       // Fetch user data by username
-      const response = await fetch(`http://localhost:5000/api/users/${username}`);
+      const response = await fetch(`http://localhost:5000/api/users/namename/${username}`);
+      console.log(response)
       const result = await response.json();
       console.log(result.data)
       if (!result.success) {

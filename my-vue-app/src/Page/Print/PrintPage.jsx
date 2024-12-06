@@ -8,16 +8,19 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
+const studentInfo = localStorage.getItem("studentInfo");
+
+
+
 function PrintPage() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [permittedFileTypes, setPermittedFileTypes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const filesPerPage = 4;
-  const studentId = 1; // Static student ID, can be dynamic
+  const studentId = JSON.parse(studentInfo).student_id;
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch permitted file types and uploaded files on mount
     fetchPermittedFileTypes();
     fetchUploadedFiles();
   }, []);
@@ -25,7 +28,10 @@ function PrintPage() {
   const fetchPermittedFileTypes = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/files/uploadpermit");
+
       const result = await response.json();
+      console.log(result.data);
+
       if (result.success) {
         setPermittedFileTypes(result.data.map((type) => type.mime_type));
       } else {
@@ -41,10 +47,11 @@ function PrintPage() {
     try {
       const response = await fetch(`http://localhost:5000/api/files/${studentId}`);
       const result = await response.json();
+
       if (result.success) {
-        setUploadedFiles(result.files); // Adjust based on API structure
+        setUploadedFiles(result.files);
       } else {
-        toast.error("Failed to fetch uploaded files.");
+        toast.error("No files to fetch");
       }
     } catch (error) {
       console.error("Error fetching uploaded files:", error);
@@ -54,22 +61,30 @@ function PrintPage() {
 
   const uploadFileToServer = async (file) => {
     try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('student_id', studentId.toString());
+      const fileTypeId = determineFileTypeId(file);
+      formData.append('file_type_id', fileTypeId.toString());
+
+      console.log('Uploading with:');
+      console.log('Student ID:', studentId);
+      console.log('File Type ID:', fileTypeId);
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
       const response = await fetch("http://localhost:5000/api/files/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          file_type_id: determineFileTypeId(file),
-          file_path: "D:/", // Update based on your requirements
-          filename: file.name,
-        }),
+        body: formData
       });
+
       const result = await response.json();
+
       if (result.success) {
         toast.success("File uploaded successfully!");
-        fetchUploadedFiles(); // Refresh file list
+        fetchUploadedFiles();
       } else {
-        toast.error("File upload failed.");
+        toast.error(result.message || "File upload failed.");
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -77,39 +92,71 @@ function PrintPage() {
     }
   };
 
+  const handleDeleteFile = async (fileId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/files/${fileId}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("File deleted successfully!");
+        fetchUploadedFiles();
+      } else {
+        toast.error(result.message || "Failed to delete file.");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Error deleting file from the server.");
+    }
+  };
+
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       acceptedFiles.forEach((file) => {
         if (permittedFileTypes.includes(file.type)) {
-          uploadFileToServer(file); // Upload immediately if type is valid
+          uploadFileToServer(file);
         } else {
           toast.error(
             <>
-              Invalid file type: <strong>{file.name}</strong>. Only allowed types: {permittedFileTypes.join(", ")}.
+              Invalid file type: <strong>{file.name}</strong>
+              <br />
+              Allowed types: {permittedFileTypes.join(", ")}
             </>
           );
         }
       });
     },
+    accept: permittedFileTypes.reduce((acc, type) => {
+      acc[type] = [];
+      return acc;
+    }, {}),
   });
 
-  const handlePrint = (fileName) => {
-    toast.success(`Preparing to print: ${fileName}`);
+  const handlePrint = async (file) => {
+
     navigate("/Print/PrintConfig", {
-      state: { fileName },
+      state: { file },
     });
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const indexOfLastFile = currentPage * filesPerPage;
   const indexOfFirstFile = indexOfLastFile - filesPerPage;
   const currentFiles = uploadedFiles.slice(indexOfFirstFile, indexOfLastFile);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   const pageNumbers = [];
   for (let i = 1; i <= Math.ceil(uploadedFiles.length / filesPerPage); i++) {
     pageNumbers.push(i);
   }
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const determineFileTypeId = (file) => {
     const fileType = permittedFileTypes.find((type) => type === file.type);
@@ -139,61 +186,74 @@ function PrintPage() {
 
         <div className="file_list_container">
           <h3>List of Documents</h3>
-          <ul className="file_list">
-            {currentFiles.map((file, index) => (
-              <motion.li
-                key={index}
-                className="file_item"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.03, backgroundColor: "#f9f9f9" }}
-                transition={{ duration: 0.3 }}
-              >
-                <span>
-                  {file.filename}
-                </span>
-                <div className="file_actions">
-                  <motion.button
-                    className="print_button"
-                    onClick={() => handlePrint(file.filename)}
-                    whileHover={{ scale: 1.2, color: "#4caf50" }}
+          {console.log("Filename: ", currentFiles)}
+          {uploadedFiles.length > 0 ? (
+            <>
+              <ul className="file_list">
+                {currentFiles.map((file) => (
+                  <motion.li
+                    key={file.file_id}
+                    className="file_item"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.03, backgroundColor: "#f9f9f9" }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <FaPrint size={20} />
-                  </motion.button>
-                  <motion.button
-                    className="remove_button"
-                    whileHover={{ scale: 1.2, color: "#f44336" }}
-                  >
-                    <FaTrashAlt size={20} />
-                  </motion.button>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
 
-          <div className="pagination">
-            <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              {"<<"}
-            </button>
-            {pageNumbers.map((number) => (
-              <button
-                key={number}
-                onClick={() => paginate(number)}
-                className={currentPage === number ? "active" : ""}
-              >
-                {number}
-              </button>
-            ))}
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === pageNumbers.length}
-            >
-              {">>"}
-            </button>
-          </div>
+                    <div className="file_info">
+                      <span className="filename">{file.filename}</span>
+                      <span className="filesize">{formatFileSize(file.size)}</span>
+
+                    </div>
+                    <div className="file_actions">
+                      <motion.button
+                        className="print_button"
+                        onClick={() => handlePrint(file)}
+                        whileHover={{ scale: 1.2, color: "#4caf50" }}
+                        title="Print file"
+                      >
+                        <FaPrint size={20} />
+                      </motion.button>
+                      <motion.button
+                        className="remove_button"
+                        onClick={() => handleDeleteFile(file.file_id)}
+                        whileHover={{ scale: 1.2, color: "#f44336" }}
+                        title="Delete file"
+                      >
+                        <FaTrashAlt size={20} />
+                      </motion.button>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+
+              <div className="pagination">
+                <button
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"<<"}
+                </button>
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className={currentPage === number ? "active" : ""}
+                  >
+                    {number}
+                  </button>
+                ))}
+                <button
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === pageNumbers.length}
+                >
+                  {">>"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="no-files">No files uploaded yet.</p>
+          )}
         </div>
       </div>
     </div>

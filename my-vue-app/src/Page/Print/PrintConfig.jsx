@@ -1,126 +1,271 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Document, Page, pdfjs } from 'react-pdf';
 import NavigationBar from "../../component/NavigationBar";
 import { useLocation, useNavigate } from "react-router-dom";
-import DocViewer, { DocViewerRenderers } from "react-doc-viewer";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 import "./PrintConfig.css";
+import "./DocxViewer.css"; 
+
+import mammoth from "mammoth";
+
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+
+
+const studentInfo = localStorage.getItem("studentInfo");
+
+
 
 function PrintConfig() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { fileName } = location.state || {};
+  const file = location.state.file || {};
+  const fileName = file.filename;
 
-  // Hooks phải được gọi trước khi điều kiện hoặc logic khác
   const [copies, setCopies] = useState(1);
   const [paperSize, setPaperSize] = useState("A4");
-  const [campus, setCampus] = useState("Lý Thường Kiệt"); // Campus state
-  const [printer, setPrinter] = useState("1"); // Default printer is 1
-  const [room, setRoom] = useState("B4-505"); // Default room for printer 1
-  const [roomOptions, setRoomOptions] = useState([
-    "B4-505", "A4-303", "B3-101", "A2-202", "C1-101"
-  ]); // Room options state
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [docxContent, setDocxContent] = useState(null);
 
-  // Room configuration based on campus and printer selection
-  const printersLTHK = [
-    { id: 1, room: "B4-505" },
-    { id: 2, room: "A4-303" },
-    { id: 3, room: "B3-101" },
-    { id: 4, room: "A2-202" },
-    { id: 5, room: "C1-101" }
-  ];
+
+  const [printers, setPrinters] = useState([]);
   
-  const printersDAn = [
-    { id: 6, room: "H1-402" },
-    { id: 7, room: "H4-503" },
-    { id: 8, room: "H6-102" },
-    { id: 9, room: "H6-405" },
-    { id: 10, room: "H1-207" }
-  ];
+  const [selectedPrinter, setSelectedPrinter] = useState(null);
+  const [defaultPrintConfig, setDefaultPrintConfig] = useState(null);
+  const [selectedPrintConfig, setSelectedPrintConfig] = useState(null);
+  const currentPages = JSON.parse(studentInfo).page_balance;
 
-  const currentPages = 100; // Giả sử hiện tại có 100 trang
-  const totalPages = paperSize === "A3" ? copies * 2 : copies;
-  const remainingPages = currentPages - totalPages;
+  
 
-  if (!fileName) {
-    return <div>No file selected for preview</div>;
+
+  useEffect(() => {
+      const fetchPrintersAndConfig = async () => {
+      try{
+        const printersResponse = await fetch('http://localhost:5000/api/printers');
+        const printersData = await printersResponse.json();
+        const availablePrintersData = printersData.filter(printerData => printerData.status === 'enabled');
+        setPrinters(availablePrintersData);
+  
+        const configResponse = await fetch('http://localhost:5000/api/print-config/default');
+        const configData = await configResponse.json();
+        setDefaultPrintConfig(configData);
+
+
+        setSelectedPrintConfig({
+          paper_size: configData.paper_size,
+          pages_to_print: configData.pages_to_print,
+          number_of_copies: configData.number_of_copies,
+          duplex: configData.duplex
+        });
+      }catch(error){
+        console.error("Error fetching data: ", error);
+        setError("Failed to load printer and default config")
+      }
+    };
+    fetchPrintersAndConfig();
+
+  }, []);
+
+
+  const isDefaultConfig = () => {
+    if (!defaultPrintConfig || !selectedPrintConfig) return true;
+    return (
+      selectedPrintConfig.paper_size === defaultPrintConfig.paper_size &&
+      selectedPrintConfig.pages_to_print === defaultPrintConfig.pages_to_print &&
+      selectedPrintConfig.number_of_copies === defaultPrintConfig.number_of_copies &&
+      selectedPrintConfig.duplex === defaultPrintConfig.duplex
+    );
+  };
+
+  const calculatePage = () => {
+    if (!selectedPrintConfig){
+      return 0;
+    }
+    const totalDocumentPages  = file.number_of_pages;
+    const numberOfCopies = selectedPrintConfig.number_of_copies
+    const pagesToPrint = selectedPrintConfig.pages_to_print;
+    const duplex = selectedPrintConfig.duplex === '2-sided' ;
+    const paperSizeA3 = selectedPrintConfig.paper_size === 'A3';
+    let finalTotalPageToPrint = 0;
+
+    if (pagesToPrint === "all") {
+      finalTotalPageToPrint =  totalDocumentPages * numberOfCopies;
+    } else if (pagesToPrint === "odd") {
+      const oddPages = Math.ceil(totalDocumentPages / 2);
+      finalTotalPageToPrint =  oddPages * numberOfCopies;
+    } else if (pagesToPrint === "even") {
+      const evenPages = Math.floor(totalDocumentPages / 2);
+      finalTotalPageToPrint =  evenPages * numberOfCopies;
+    } 
+    if (duplex){
+      finalTotalPageToPrint = Math.ceil(finalTotalPageToPrint / 2)
+    }
+    if(paperSizeA3){
+      finalTotalPageToPrint = Math.ceil(finalTotalPageToPrint * 2)
+    }
+    return finalTotalPageToPrint;
   }
 
-  const documents = [
-    { uri: `/path/to/your/files/${fileName}`, fileType: fileName.split(".").pop() }
-  ];
+  
+
+  
+
+  const getFileType = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    return extension;
+  }
+  const loadDocxContent = async(filePath) => {
+    try{
+      const response = await fetch(filePath);
+      const blob = await response.blob();
+      
+      
+      const arrayBuffer = await blob.arrayBuffer();
+
+      const result = await mammoth.convertToHtml({ arrayBuffer }, {
+        styleMap: [
+          "p[style-name='Section Title'] => h1:fresh",
+          "p[style-name='Subsection Title'] => h2:fresh"
+          ]
+        });
+        setDocxContent(result.value);
+        setIsLoading(false);
+    }catch(error){
+      setError("Error loading docx content" + error.message);
+      setIsLoading(false);
+    }
+  }
+
+  const renderReview = ()  => {
+    if(isLoading){
+      return <div className="loading"> Loading document...</div>
+    }
+
+    if (error){
+      return <div className="error">{error}</div>
+    }
+
+    const fileType = getFileType(fileName);
+    switch(fileType){
+      case 'pdf':
+        return (
+          <iframe
+            src={file.file_path}
+            title="PDF Preview"
+            width="100%"
+            height="600px"
+            style={{ border: 'none' }}
+          />
+        )
+      case 'docx':
+        return (
+          <div className="docx-viewer">
+            <div 
+              className="docx-content"
+              dangerouslySetInnerHTML={{ __html: docxContent }}
+            />
+          </div>
+        )
+        default:
+          return <div>Unsupported file type</div>;
+    }
+  }
+  useEffect(() => {
+      if (file.file_path) {
+        const fileType = getFileType(file.filename);
+        if (fileType === 'docx') {
+          loadDocxContent(file.file_path);
+        } else {
+          setIsLoading(false);
+        }
+      }
+  }, [file.file_path]);
+
+
+ 
 
   const handleCancel = () => {
     navigate("/Print");
   };
 
-  const handlePrint = () => {
-    // Kiểm tra điều kiện và log giá trị remainingPages
-    console.log("Remaining Pages: ", remainingPages);
-  
-    if (remainingPages < 0) {
-      toast.error("Your account doesn't have enough pages!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    } else {
-      const locationToGetFile = `${campus} ${room}`;
-      // Truyền các giá trị vào navigate
-      navigate("/Print/PrintConfirm", {
-        state: {
-          fileName,
-          copies,
-          paperSize,
-          totalPages,      // Truyền totalPages vào state
-          remainingPages,  // Truyền remainingPages vào state
-          locationToGetFile // Thêm trường locationToGetFile nếu cần
+  const handlePrint = async () => {
+      console.log("Remaining Pages: ", calculatePage());
+      if (currentPages -  calculatePage() < 0) {
+        toast.error("Your account doesn't have enough pages!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        return;
+      }
+
+      if (!selectedPrinter || !selectedPrintConfig) {
+        toast.error("Please select a printer or a print configuration setting")
+        return;
+      }
+
+
+      try{
+        const printJobData = {
+            student_id: JSON.parse(studentInfo).student_id,
+            printer_id: parseInt(selectedPrinter.printer_id),
+            file_ids: [file.file_id],
+            total_page_cost: calculatePage(),
         }
-      });
+
+        if (isDefaultConfig()){
+          printJobData.print_config_id = 1
+        }else{
+          printJobData.printer_config_id = {
+            paper_size: selectedPrintConfig.paper_size,
+            pages_to_print: selectedPrintConfig.pages_to_print,
+            number_of_copies: selectedPrintConfig.number_of_copies,
+            duplex: selectedPrintConfig.duplex === "2-sided"
+          }
+        }
+
+
+        
+        navigate("/Print/PrintConfirm", {
+            state: {
+              printJobData,
+              file,
+              fileName,
+              copies: selectedPrintConfig.number_of_copies,
+              paperSize: selectedPrintConfig.paper_size,
+              totalPages: calculatePage(),
+              remainingPages: currentPages - calculatePage(),
+              locationToGetFile: `${selectedPrinter.campus_name} ${selectedPrinter.building_name}-${selectedPrinter.room_number}`
+            }
+          });
+
+      }catch(error){
+        toast.error("Error submitting print job");
+        console.error(error);
+      }
     }
-  };
-
-  // Cập nhật phòng và máy in khi chọn campus
-  const handleCampusChange = (e) => {
-    const selectedCampus = e.target.value;
-    setCampus(selectedCampus);
-
-    if (selectedCampus === "Dĩ An") {
-      setRoomOptions([
-        "H1-402", "H4-503", "H6-102", "H6-405", "H1-207"
-      ]);
-      setPrinter("6"); // Reset printer to 6 when campus changes to Dĩ An
-      setRoom("H1-402"); // Reset room to the default one for printer 6
-    } else {
-      setRoomOptions([
-        "B4-505", "A4-303", "B3-101", "A2-202", "C1-101"
-      ]);
-      setPrinter("1"); // Reset printer to 1 when campus changes to Lý Thường Kiệt
-      setRoom("B4-505"); // Reset room to the default one for printer 1
-    }
-  };
-
-  // Cập nhật thông tin phòng khi chọn máy in
   const handlePrinterChange = (e) => {
-    const selectedPrinter = e.target.value;
-    setPrinter(selectedPrinter);
-    const printerId = parseInt(selectedPrinter, 10);
-
-    let selectedRoom = "";
-    if (campus === "Lý Thường Kiệt") {
-      const selectedPrinterInfo = printersLTHK.find(p => p.id === printerId);
-      selectedRoom = selectedPrinterInfo ? selectedPrinterInfo.room : "";
-    } else {
-      const selectedPrinterInfo = printersDAn.find(p => p.id === printerId);
-      selectedRoom = selectedPrinterInfo ? selectedPrinterInfo.room : "";
-    }
-
-    setRoom(selectedRoom);
+    const printerId = parseInt(e.target.value);
+    const printer = printers.find(p => p.printer_id === printerId);
+    setSelectedPrinter(printer);
   };
+
+  const handleConfigChange = (field, value) =>{
+    setSelectedPrintConfig(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }
+
+
 
   return (
     <>
@@ -130,79 +275,76 @@ function PrintConfig() {
         <div className="left-panel">
           <h3>Print Setup</h3>
           <div className="option">
-            <label>Campus:</label>
-            <select value={campus} onChange={handleCampusChange}>
-              <option>Lý Thường Kiệt</option>
-              <option>Dĩ An</option>
-            </select>
-          </div>
-          <div className="option">
             <label>Printer:</label>
-            <select value={printer} onChange={handlePrinterChange}>
-              {campus === "Lý Thường Kiệt" ? (
-                printersLTHK.map((printerInfo) => (
-                  <option key={printerInfo.id} value={printerInfo.id}>
-                    Printer {printerInfo.id}
-                  </option>
-                ))
-              ) : (
-                printersDAn.map((printerInfo) => (
-                  <option key={printerInfo.id} value={printerInfo.id}>
-                    Printer {printerInfo.id}
-                  </option>
-                ))
-              )}
+            <select value={selectedPrinter?.printer_id || ''} onChange={handlePrinterChange}>
+              <option value = ''>Select Printer</option>
+              {printers.map((printer) => (
+                <option
+                  key = {printer.printer_id}
+                  value = {printer.printer_id}
+                >
+                  {printer.printer_name} - {printer.campus_name} {printer.building_name}-{printer.room_number}
+                </option>
+              ))}
             </select>
           </div>
-          <div className="option">
-            <label>Room:</label>
-            {/* Use CSS for better visual clarity */}
-            <select className="room-select" value={room} readOnly>
-              <option>{room}</option>
-            </select>
-          </div>
+
           <div className="option">
             <label>Page Range:</label>
-            <select>
-              <option>All Pages</option>
-              <option>Even Pages</option>
-              <option>Odd Pages</option>
+            <select
+              value = {selectedPrintConfig?.pages_to_print  || 'all'}
+              onChange={(e) => handleConfigChange('pages_to_print', e.target.value)}
+            >
+              <option value='all'>All Pages</option>
+              <option value='even'>Even Pages</option>
+              <option value='odd'>Odd Pages</option>
             </select>
           </div>
+
+
           <div className="option">
             <label>Paper Size:</label>
-            <select value={paperSize} onChange={(e) => setPaperSize(e.target.value)}>
-              <option>A4</option>
-              <option>A3</option>
+            <select
+             value={selectedPrintConfig?.paper_size || 'A4'} 
+             onChange={(e) => handleConfigChange('paper_size', e.target.value)}
+            >
+              <option value='A4'>A4</option>
+              <option value='A3'>A3</option>
             </select>
           </div>
+
+
+
           <div className="option">
             <label>Print Side:</label>
-            <select>
-              <option>Single-sided</option>
-              <option>Double-sided</option>
+            <select
+              value={selectedPrintConfig?.duplex  || '2-sided'}
+              onChange={(e) => handleConfigChange('duplex', e.target.value)}
+            >
+              <option value='1-sided'>Single-sided</option>
+              <option value='2-sided'>Double-sided</option>
             </select>
           </div>
-          <div className="option">
-            <label>Orientation:</label>
-            <select>
-              <option>Portrait</option>
-              <option>Landscape</option>
-            </select>
-          </div>
+
+
           <div className="option">
             <label>Copies:</label>
             <input className="copies"
               type="number"
               min="1"
-              value={copies}
-              onChange={(e) => setCopies(Number(e.target.value))}
+              value={selectedPrintConfig?.number_of_copies > 0? selectedPrintConfig?.number_of_copies : 0 || 1}
+              onChange={(e) => handleConfigChange('number_of_copies', e.target.value)}
             />
           </div>
+
+
+
           <div className="status">
             <div className="current">Current A4 Pages: <span className="currentpage">{currentPages}</span></div>
-            <div style={{ color: remainingPages < 0 ? "red" : "black" }}>
-              Remaining Pages: <span className="remainpage">{remainingPages}</span>
+            <div className="current">Page to pay:<span className="currentpage">{calculatePage()}</span></div>
+
+            <div style={{ color: currentPages - calculatePage() < 0 ? "red" : "black" }}>
+              Remaining Pages: <span className="remainpage">{currentPages - calculatePage()}</span>
             </div>
           </div>
           <div className="buttons">
@@ -212,10 +354,9 @@ function PrintConfig() {
         </div>
         <div className="right-panel">
           <h3>Preview</h3>
-          <DocViewer
-            documents={documents}
-            pluginRenderers={DocViewerRenderers}
-          />
+          <div className="pdf-preview">
+          {renderReview()}
+          </div>
         </div>
       </div>
     </>

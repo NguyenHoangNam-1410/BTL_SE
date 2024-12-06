@@ -26,7 +26,7 @@ class PrintJobController{
      */
     createPrintJob = async (req, res) => {
         try{
-            const {printer_config_id, printer_id, student_id, file_ids} = req.body;
+            const {printer_config_id, printer_id, student_id, file_ids, total_page_cost} = req.body;
 
             if (!file_ids || file_ids.length === 0){
                 return res.status(400).json({
@@ -46,6 +46,7 @@ class PrintJobController{
                 student_id,
                 print_start_time : printST,
                 print_end_time: printET,
+                total_page_cost
             };
 
             if (typeof printer_config_id === 'object'){
