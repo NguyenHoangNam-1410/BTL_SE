@@ -69,7 +69,7 @@ function Dashboard() {
                     <h2>📂 Balance Information</h2>
                     <p><strong>Default Page Allocation:</strong> {userData.page_allocated || 0}</p>
                 
-                    <p><strong>Current Balance:</strong> {userData.page_balance }</p>
+                    <p className="p"><strong>Current Balance:</strong> {userData.page_balance }</p>
                     <div className="balance-display">
                         <span className="balance-amount">{userData.page_balance}</span>
                         <span className="balance-label">Page Balance</span>
@@ -78,11 +78,6 @@ function Dashboard() {
                     <button className="transaction-link" onClick={handleTransactionHistory}>
                         View Transaction History
                     </button>
-                </section>
-
-                <section className="additional-info">
-                    <h2>🗓️ Timestamps</h2>
-                    <p><strong>Account Created At:</strong> {new Date(userData.create_at).toLocaleString()}</p>
                 </section>
             </div>
         </>

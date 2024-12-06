@@ -3,18 +3,22 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: #E7F0F8;
+  overflow-y: hidden; /* Ẩn thanh cuộn dọc */
+  height: 100%; /* Đảm bảo chiều cao body luôn đầy đủ */
 }
 
 /* Container */
 .transaction-history-container {
   width: 80%;
-  margin: 50px auto;
+  margin: 80px auto;
   background-color: white;
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   text-align: center;
+  max-height: calc(100vh - 60px); /* Điều chỉnh chiều cao container */
+  overflow-y: auto; /* Cuộn dọc nếu cần */
 }
 
 /* Title */
@@ -29,7 +33,6 @@ body {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
-  
 }
 
 .transaction-history-table th,
@@ -60,7 +63,6 @@ body {
   justify-content: center;
   align-items: center;
   margin-top: 10px;
-  background-color: #E7F0F8;
 }
 
 .pagination-button {
@@ -83,4 +85,10 @@ body {
   font-size: 18px;
   color: #444;
   margin: 0 10px;
+}
+
+/* Optional: Hide scrollbar */
+html, body {
+  overflow: hidden; /* Ẩn thanh cuộn dọc nếu không cần thiết */
+  height: 100%; /* Đảm bảo chiều cao trang đầy đủ */
 }

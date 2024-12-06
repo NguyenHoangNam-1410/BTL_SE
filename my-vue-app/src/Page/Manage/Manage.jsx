@@ -178,32 +178,35 @@ function Manage() {
       </div>
 
       {selectedPrinterIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal modal-printer-details">
-            <h2>{printers[selectedPrinterIndex].printer_name} - {printers[selectedPrinterIndex].model}</h2>
-            <p><strong>Location:</strong> {printers[selectedPrinterIndex].building_name}</p>
-            <p><strong>Room:</strong> {printers[selectedPrinterIndex].room_number}</p>
-            <p>
-              <strong>Status:</strong>
-              <select
-                value={printers[selectedPrinterIndex].status}
-                onChange={(e) => {
-                  const updatedStatus = e.target.value;
-                  setPrinters((prev) =>
-                    prev.map((printer, index) =>
-                      index === selectedPrinterIndex ? { ...printer, status: updatedStatus } : printer
-                    )
-                  );
-                }}
-              >
-                <option value="enabled">Enabled</option>
-                <option value="disabled">Disabled</option>
-              </select>
-            </p>
-            <button className="close-button" onClick={closePrinterDetailsModal}>Close</button>
-            <button className="confirm-button" onClick={handleStatusUpdate}>Confirm Status Update</button>
-          </div>
-        </div>
+    <div className="modal-overlay">
+  <div className="modal modal-printer-details">
+    <h2>{printers[selectedPrinterIndex].printer_name} - {printers[selectedPrinterIndex].model}</h2>
+    <p className="campus"><strong>Campus:</strong> {printers[selectedPrinterIndex].campus_name}</p>
+    <p className="location"><strong>Location:</strong> {printers[selectedPrinterIndex].building_name}</p>
+    <p className="room"><strong>Room:</strong> {printers[selectedPrinterIndex].room_number}</p>
+    <p className="status">
+      <strong>Status:</strong>
+      <select
+        value={printers[selectedPrinterIndex].status}
+        onChange={(e) => {
+          const updatedStatus = e.target.value;
+          setPrinters((prev) =>
+            prev.map((printer, index) =>
+              index === selectedPrinterIndex ? { ...printer, status: updatedStatus } : printer
+            )
+          );
+        }}
+      >
+        <option value="enabled">Enabled</option>
+        <option value="disabled">Disabled</option>
+      </select>
+    </p>
+    {/* Thay thế nút Close thành X ở góc trên bên phải */}
+    <span className="close-button" onClick={closePrinterDetailsModal}>X</span>
+    <button className="confirm-button" onClick={handleStatusUpdate}>Confirm Status Update</button>
+  </div>
+</div>
+
       )}
 
       {/* Modal for adding new printer */}

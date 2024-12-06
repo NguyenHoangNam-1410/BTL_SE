@@ -341,7 +341,7 @@ function PrintConfig() {
 
           <div className="status">
             <div className="current">Current A4 Pages: <span className="currentpage">{currentPages}</span></div>
-            <div className="current">Page to pay:<span className="currentpage">{calculatePage()}</span></div>
+            <div className="current">Page to pay:<span className="currentPage">{calculatePage()}</span></div>
 
             <div style={{ color: currentPages - calculatePage() < 0 ? "red" : "black" }}>
               Remaining Pages: <span className="remainpage">{currentPages - calculatePage()}</span>

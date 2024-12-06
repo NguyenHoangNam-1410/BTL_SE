@@ -178,9 +178,9 @@ function PrintPage() {
           >
             <input {...getInputProps()} />
             <FaCloudUploadAlt className="upload-icon" />
-            <p>Drag and drop your files here</p>
-            <p>-- Or --</p>
-            <button>Browse</button>
+            <p className="text">Drag and drop your files here</p>
+            <p className="text1">-- Or --</p>
+            <button >Browse</button>
           </motion.div>
         </div>
 
