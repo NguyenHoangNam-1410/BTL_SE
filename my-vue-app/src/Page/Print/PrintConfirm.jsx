@@ -83,10 +83,13 @@ function PrintConfirm() {
             <p><strong>Remaining Pages:</strong> {remainingPages}</p>
             <p><strong>Location to Pick Up:</strong> {locationToGetFile}</p>
           </div>
-          <div className="buttons">
-            <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+          <div className="buttonss">
+            <button className="cancel-bu" onClick={handleCancel}>Cancel</button>
             <button className="confirm-btn" onClick={handleConfirm}>Confirm</button>
           </div>
+        </div>
+        <div className='buff'>
+          <h2>Hello</h2>
         </div>
       </div>
 

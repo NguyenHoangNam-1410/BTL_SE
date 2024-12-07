@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NavigationBar_Ad from "../../component/NavigationBar_Ad";
 import "./Setup.css";
 
@@ -12,14 +12,31 @@ function Setup() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
+  useEffect(() => {
+    // Khi component load, lấy dữ liệu từ localStorage
+    const savedAllocations = localStorage.getItem("allocations");
+    const savedDefaultPages = localStorage.getItem("defaultPages");
+
+    if (savedAllocations) {
+      setAllocations(JSON.parse(savedAllocations));
+    }
+
+    if (savedDefaultPages) {
+      setDefaultPages(savedDefaultPages);
+    }
+  }, []);
+
   const handleSetDefault = () => {
     if (!defaultPages || isNaN(defaultPages)) {
       alert("Please enter a valid number of pages.");
       return;
     }
     const nextTerm = getNextTerm(allocations[allocations.length - 1].term);
-    setAllocations([...allocations, { term: nextTerm, pages: Number(defaultPages) }]);
+    const updatedAllocations = [...allocations, { term: nextTerm, pages: Number(defaultPages) }];
+    setAllocations(updatedAllocations);
+    localStorage.setItem("allocations", JSON.stringify(updatedAllocations)); // Lưu allocations vào localStorage
     setDefaultPages("");
+    localStorage.setItem("defaultPages", ""); // Xóa giá trị defaultPages khỏi localStorage
   };
 
   const getNextTerm = (currentTerm) => {
@@ -43,6 +60,7 @@ function Setup() {
     const updatedAllocations = [...allocations];
     updatedAllocations[index].pages = Number(editValue);
     setAllocations(updatedAllocations);
+    localStorage.setItem("allocations", JSON.stringify(updatedAllocations)); // Lưu allocations sau khi thay đổi
     setEditIndex(null);
     setEditValue("");
   };
